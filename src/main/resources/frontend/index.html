@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Weather App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>🌤 Real-Time Weather</h1>
+
+    <div class="input-container">
+        <label for="cityInput">Select City:</label>
+        <select id="cityInput">
+            <option value="London">London </option>
+            <option value="Paris">Paris </option>
+            <option value="Mumbai">Mumbai </option>
+            <option value="Tokyo">Tokyo </option>
+            <option value="Moscow">Moscow </option>
+            <option value="Singapore">Singapore </option>
+            <option value="Tunis">Tunis </option>
+            <option value="Cairo">Cairo </option>
+            <option value="Sydney">Sydney </option>
+
+        </select>
+    </div>
+
+    <div class="weather-card">
+        <h2 id="cityDisplay">City</h2>
+        <div class="temp-icon">
+            <p id="tempDisplay">-- °C</p>
+            <img id="iconDisplay" alt="weather icon" />
+        </div>
+        <p id="descDisplay">Weather description</p>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
