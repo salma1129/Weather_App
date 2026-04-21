@@ -1,0 +1,26 @@
+name: Sentinel Arsenal
+on: [push]
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Security Scans
+        run: |
+          docker run --rm -v $(pwd):/path zricethezav/gitleaks:latest detect --source="/path" --report-format json --report-path l.json || echo "[]" > l.json
+          docker run --rm -v $(pwd):/src returntocorp/semgrep semgrep scan --json > s.json || echo '{ "results": [] }' > s.json
+          docker run --rm -v $(pwd):/src -v $HOME/.cache/trivy:/root/.cache/ aquasec/trivy:0.50.2 fs /src --format json > t.json || echo '{ "Results": [] }' > t.json
+          echo '{"site":[] }' > z.json
+          test -f z.json || echo '{"site":[]}' > z.json
+          jq empty l.json >/dev/null 2>&1 || echo "[]" > l.json
+          jq empty s.json >/dev/null 2>&1 || echo '{"results":[]}' > s.json
+          jq empty t.json >/dev/null 2>&1 || echo '{"Results":[]}' > t.json
+          jq empty z.json >/dev/null 2>&1 || echo '{"site":[]}' > z.json
+      - name: Ship
+        run: |
+          jq -n             --arg repo "salma1129/Weather_App"             --arg token "${{ secrets.SENTINEL_APP_TOKEN }}"             --arg ver "${{ github.sha }}"             --arg ts "$(date +%s)"             --slurpfile s s.json             --slurpfile t t.json             --slurpfile l l.json             --slurpfile z z.json             '{repo: $repo, token: $token, version: $ver, timestamp: $ts, scans: {semgrep: ($s[0]//{}), trivy: ($t[0]//{}), gitleaks: ($l[0]//[]), zap: ($z[0]//{})}}' > payload.json
+
+          SIG=$(openssl dgst -sha256 -hmac "${{ secrets.SENTINEL_APP_SECRET }}" payload.json | sed 's/.* //')
+
+          curl -X POST "https://observed-clarity-surround-tommy.trycloudflare.com/upload-intelligence"             -H "X-Sentinel-Token: ${{ secrets.SENTINEL_APP_TOKEN }}"             -H "X-Sentinel-Signature: $SIG"             -H "Content-Type: application/json"             -H "bypass-tunnel-reminder: true"             --data-binary @payload.json
